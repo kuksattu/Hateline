@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
 using Celeste.Mod.Hateline.CelesteNet;
 using FMOD.Studio;
 using Monocle;
@@ -19,92 +20,102 @@ namespace Celeste.Mod.Hateline
         public static HatelineModuleSession Session => (HatelineModuleSession)Instance._Session;
 
         public bool HasForcedHat => Settings.AllowMapChanges && Session?.MapForcedHat != null;
-
         public bool ShouldShowHat => HasForcedHat || Settings.Enabled;
-        public string? CurrentHat => HasForcedHat ? Session.MapForcedHat : Settings.SelectedHat;
-
+        public string? VisibleHat => HasForcedHat ? Session.MapForcedHat : Settings.SelectedHat;
+        public string? CurrentHat => ShouldShowHat ? VisibleHat : HAT_NONE;
         public int CurrentX => HasForcedHat ? Session.mapsetX : Settings.CrownX;
         public int CurrentY => HasForcedHat ? Session.mapsetY : Settings.CrownY;
+        public const string HAT_NONE = "none";
 
         public static List<string> hats = new List<string>();
 
-        public const string DEFAULT = "none";
 
-        public HatelineModule()
-        {
-            Instance = this;
-        }
+        public Dictionary<string, Dictionary<string, string>> HatAttributes = new();
+        // Define custom hat attributes here
+        private readonly List<(string, string)> _hatAttributeDefinitions = new()
+        { // The name of the attribute and its default value
+            ("scaling", "true"),
+            ("flip", "true"),
+        };
+
+        public HatelineModule() { Instance = this; }
 
         public override void Load()
         {
             typeof(GravityHelperImports).ModInterop();
-
-            On.Celeste.Player.Added += hookPlayerAdded;
-            On.Celeste.GameLoader.LoadThread += LateLoader;
-
-            if (Everest.Modules.Any(m => m.Metadata.Name == "CelesteNet.Client"))
-            {
+            On.Celeste.Player.Added += HookPlayerAdded;
+            On.Celeste.Level.LoadLevel += HookLoadLevel;
+            On.Celeste.Player.ResetSprite += HookPlayerResetSprite;
+            
+            if (Everest.Modules.Any(m => m.Metadata.Name == "CelesteNet.Client")) 
                 CelesteNetSupport.Load();
-            }
         }
 
-        private void hookPlayerAdded(On.Celeste.Player.orig_Added orig, Player self, Scene scene)
+        public override void Unload()
         {
-            orig.Invoke(self, scene);
-            self.Add(new HatComponent(Settings.SelectedHat));
-        }
+            On.Celeste.Player.Added -= HookPlayerAdded;
+            On.Celeste.Level.LoadLevel -= HookLoadLevel;
+            On.Celeste.Player.ResetSprite -= HookPlayerResetSprite;
 
+            if (Everest.Modules.Any(m => m.Metadata.Name == "CelesteNet.Client")) 
+                CelesteNetSupport.Unload();
+        }
+        
+        private static void HookLoadLevel(On.Celeste.Level.orig_LoadLevel orig, Level self, Player.IntroTypes playerintro, bool isfromloader)
+        {
+            HatelineModule.Instance.HatAttributes = ParseHatXmlAttributes(GFX.SpriteBank.XML);
+            orig(self, playerintro, isfromloader);
+        }
+        
+        private static void HookPlayerResetSprite(On.Celeste.Player.orig_ResetSprite orig, Player self, PlayerSpriteMode mode)
+        {
+            orig(self, mode);
+            self.Get<HatComponent>()?.RemoveSelf();
+            self.Add(new HatComponent(Instance.CurrentHat, Instance.CurrentX, Instance.CurrentY));
+        }
+        
+        private static void HookPlayerAdded(On.Celeste.Player.orig_Added orig, Player self, Scene scene)
+        {
+            orig(self, scene);
+            self.Get<HatComponent>()?.RemoveSelf();
+            self.Add(new HatComponent(Instance.CurrentHat, Instance.CurrentX, Instance.CurrentY));
+        }
+        
+        
         public override void CreateModMenuSection(TextMenu menu, bool inGame, EventInstance snapshot)
         {
             base.CreateModMenuSection(menu, inGame, snapshot);
             HatelineSettingsUI.CreateMenu(menu, inGame);
         }
-
-        private void LateLoader(On.Celeste.GameLoader.orig_LoadThread orig, GameLoader self)
+        
+        public static void ReloadHat()
         {
-            orig(self);
-        }
-
-        public override void Unload()
-        {
-            On.Celeste.Player.Added -= hookPlayerAdded;
-            On.Celeste.GameLoader.LoadThread -= LateLoader;
-
-            if (Everest.Modules.Any(m => m.Metadata.Name == "CelesteNet.Client"))
-            {
-                CelesteNetSupport.Unload();
-            }
-        }
-
-        public static void ReloadHat(bool inGame, int x, int y)
-        {
-            string hat = Instance.CurrentHat;
-
-            if (!inGame || !Settings.Enabled)
-                return;
-
-            HatComponent playerHatComponent = Engine.Scene.Tracker.GetComponents<HatComponent>().FirstOrDefault(c => c.Entity is Player) as HatComponent;
-
-            if (playerHatComponent == null)
-                return;
-
-            if (Instance.HasForcedHat)
-            {
-                Session.mapsetX = x;
-                Session.mapsetY = y;
-            }
-            else
-            {
-                x = Settings.CrownX;
-                y = Settings.CrownY;
-            }
-
-            playerHatComponent.CreateHat(hat, true);
-            playerHatComponent.SetPosition(x, y);
-            playerHatComponent.UpdatePosition();
-
-            Logger.Log(LogLevel.Verbose, "Hateline", $"ReloadHat: Calling SendPlayerHat of {CelesteNetSupport.CNetComponent}");
+            HatComponent playerHatComponent = Engine.Scene?.Tracker?.GetEntity<Player>()?.Get<HatComponent>();
+            if (playerHatComponent is null) return;
+            
+            playerHatComponent.CreateHat(Instance.CurrentHat, true);
+            playerHatComponent.SetPosition(Instance.CurrentX, Instance.CurrentY);
+            
             CelesteNetSupport.CNetComponent?.SendPlayerHat();
+        }
+        
+        // Xml parsing for custom hat attributes
+        public static Dictionary<string, Dictionary<string, string>> ParseHatXmlAttributes(XmlDocument xmlDoc)
+        {
+            var result = new Dictionary<string, Dictionary<string, string>>();
+        
+            XmlNodeList nodes = xmlDoc.SelectNodes("//Sprites/*[starts-with(name(), 'hateline_')]");
+            foreach (XmlNode node in nodes)
+            {
+                var attributes = new Dictionary<string, string>();
+
+                foreach ((string name, string defaultValue) in Instance._hatAttributeDefinitions)
+                    attributes[name] = node.Attributes?[name]?.Value ?? defaultValue;
+                
+                // [9..] removes the hateline_ prefix
+                result[node.Name[9..]] = attributes;
+            }
+            return result;
         }
     }
 }

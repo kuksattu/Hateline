@@ -7,9 +7,7 @@ namespace Celeste.Mod.Hateline.Triggers
     public class HatResetTrigger : Trigger
     {
         public HatResetTrigger(EntityData data, Vector2 offset)
-            : base(data, offset)
-        {
-        }
+            : base(data, offset) { }
 
         public override void OnEnter(Player player)
         {
@@ -18,7 +16,7 @@ namespace Celeste.Mod.Hateline.Triggers
             HatelineModule.Session.MapForcedHat = null;
             HatelineModule.Session.mapsetX = 0;
             HatelineModule.Session.mapsetY = 0;
-            HatelineModule.ReloadHat(true, HatelineModule.Settings.CrownX, HatelineModule.Settings.CrownY);
+            HatelineModule.ReloadHat();
         }
     }
 }

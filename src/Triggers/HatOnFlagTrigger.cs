@@ -8,9 +8,7 @@ namespace Celeste.Mod.Hateline.Triggers
     {
         public string hat;
         public string flag;
-
         public bool inverted;
-
         public int hatX;
         public int hatY;
 
@@ -26,21 +24,17 @@ namespace Celeste.Mod.Hateline.Triggers
 
         public override void OnEnter(Player player)
         {
+            base.OnEnter(player);
+            
             bool flagVal = SceneAs<Level>().Session.GetFlag(flag);
-            if (inverted)
-                flagVal = !flagVal;
+            if (inverted) flagVal = !flagVal;
 
-            base.OnEnter(player);
-            if (flagVal && HatelineModule.Settings.AllowMapChanges && HatelineModule.Settings.Enabled)
-            {
-                HatelineModule.Session.MapForcedHat = hat;
-                HatelineModule.ReloadHat(true, hatX, hatY);
-            }
-        }
+            if (!flagVal || !HatelineModule.Settings.AllowMapChanges) return;
 
-        public override void OnLeave(Player player)
-        {
-            base.OnEnter(player);
+            HatelineModule.Session.MapForcedHat = hat;
+            HatelineModule.Session.mapsetX = hatX;
+            HatelineModule.Session.mapsetY = hatY;
+            HatelineModule.ReloadHat();
         }
     }
 }

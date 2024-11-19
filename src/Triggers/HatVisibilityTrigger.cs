@@ -7,7 +7,6 @@ namespace Celeste.Mod.Hateline.Triggers
     public class HatForceTrigger : Trigger
     {
         public string hat;
-
         public int hatX;
         public int hatY;
 
@@ -18,22 +17,16 @@ namespace Celeste.Mod.Hateline.Triggers
             hatX = data.Int("hatX", 0);
             hatY = data.Int("hatY", -8);
         }
-
+        
         public override void OnEnter(Player player)
         {
             base.OnEnter(player);
-
-            if (HatelineModule.Settings.AllowMapChanges &&
-                HatelineModule.Settings.Enabled)
-            {
-                HatelineModule.Session.MapForcedHat = hat;
-                HatelineModule.ReloadHat(true, hatX, hatY);
-            }
-        }
-
-        public override void OnLeave(Player player)
-        {
-            base.OnEnter(player);
+            if (!HatelineModule.Settings.AllowMapChanges) return;
+            
+            HatelineModule.Session.MapForcedHat = hat;
+            HatelineModule.Session.mapsetX = hatX;
+            HatelineModule.Session.mapsetY = hatY;
+            HatelineModule.ReloadHat();
         }
     }
 }

@@ -59,19 +59,32 @@ namespace Celeste.Mod.Hateline.CelesteNet
             if (Engine.Scene == null)
                 return;
 
-            string selHat;
-            HatComponent hatComp;
             foreach (Ghost ghost in Engine.Scene.Tracker.GetEntities<Ghost>())
             {
                 DataPlayerHat hatData = null;
                 CelesteNetSupport.CNetComponent?.Client?.Data?.TryGetBoundRef(ghost.PlayerInfo, out hatData);
-                selHat = hatData?.SelectedHat ?? HatelineModule.DEFAULT;
-                hatComp = ghost.Get<HatComponent>();
-
-                if (hatComp == null && selHat != HatelineModule.DEFAULT)
+                if (hatData == null) continue;
+                
+                string selHat = hatData?.SelectedHat ?? HatelineModule.HAT_NONE;
+                HatComponent hatComp = ghost.Get<HatComponent>();
+                
+                switch (hatComp)
                 {
-                    ghost.Add(new HatComponent());
-                } else if (hatComp != null && selHat == HatelineModule.DEFAULT)
+                    case null when hatData.SelectedHat != HatelineModule.HAT_NONE:
+                        ghost.Add(new HatComponent(selHat, hatData?.CrownX, hatData?.CrownY));
+                        continue;
+                    case null:
+                        continue;
+                }
+                
+                if (hatData.CrownX != hatComp.CrownX || hatData.CrownY != hatComp.CrownY || hatData.SelectedHat != hatComp.CrownSprite)
+                {
+                    hatComp.RemoveSelf();
+                    hatComp = new HatComponent(selHat, hatData?.CrownX, hatData?.CrownY);
+                    ghost.Add(hatComp);
+                }
+                
+                if (selHat == HatelineModule.HAT_NONE)
                 {
                     ghost.Remove(hatComp);
                 }
@@ -84,7 +97,7 @@ namespace Celeste.Mod.Hateline.CelesteNet
             
             if(!HatelineModule.Instance.ShouldShowHat && string.IsNullOrEmpty(forceSend)) return;
 
-            string hatToSend = HatelineModule.Instance.CurrentHat;
+            string hatToSend = HatelineModule.Instance.VisibleHat;
             if (!string.IsNullOrEmpty(forceSend))
                 hatToSend = forceSend;
 

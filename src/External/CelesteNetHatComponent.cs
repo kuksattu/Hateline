@@ -11,6 +11,7 @@ namespace Celeste.Mod.Hateline.CelesteNet
     public class CelesteNetHatComponent : GameComponent
     {
         protected readonly CelesteNetClientModule _clientModule;
+        
         private Delegate _initHook;
         private Delegate _disposeHook;
 
@@ -32,7 +33,6 @@ namespace Celeste.Mod.Hateline.CelesteNet
                 disposeEvent.AddEventHandler(null, _disposeHook = (Action<CelesteNetClientContext>)(_ => clientDisposed()));
             else
                 disposeEvent.AddEventHandler(null, _disposeHook = (Action<object>)(_ => clientDisposed()));
-            
         }
         
         private void clientDisposed()

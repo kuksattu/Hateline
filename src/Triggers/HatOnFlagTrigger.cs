@@ -8,7 +8,9 @@ namespace Celeste.Mod.Hateline.Triggers
     {
         public string hat;
         public string flag;
+        
         public bool inverted;
+        
         public int hatX;
         public int hatY;
 

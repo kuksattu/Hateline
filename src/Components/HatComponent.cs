@@ -15,6 +15,7 @@ namespace Celeste.Mod.Hateline
         public int CrownX, CrownY;
 
         public PlayerHair playerHair => Entity.Get<PlayerHair>();
+        
         public PlayerSprite playerSprite => Entity.Get<PlayerSprite>();
 
         public HatComponent(string hatSprite = HatelineModule.HAT_NONE, int? crownX = null, int? crownY = null) : base(null, null)

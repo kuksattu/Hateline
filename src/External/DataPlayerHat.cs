@@ -5,20 +5,19 @@ namespace Celeste.Mod.Hateline.CelesteNet
 {
     public class DataPlayerHat : DataType<DataPlayerHat>
     {
-        static DataPlayerHat()
-        {
-            DataID = $"Hateline_PlayerHat";
-        }
-
-        public override DataFlags DataFlags => DataFlags.CoreType;
-
+        static DataPlayerHat() { DataID = $"Hateline_PlayerHat"; }
+        
         public DataPlayerInfo Player;
 
         public int CrownX = HatelineModule.Settings.CrownX;
         public int CrownY = HatelineModule.Settings.CrownY;
+        
         public string SelectedHat = HatelineModule.Settings.SelectedHat;
+        
+        public override DataFlags DataFlags => DataFlags.CoreType;
 
         public override bool FilterHandle(DataContext ctx) => Player != null;
+        
         public override MetaType[] GenerateMeta(DataContext ctx) => new MetaType[]
         {
             new MetaPlayerPrivateState(Player),

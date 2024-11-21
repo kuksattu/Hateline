@@ -7,6 +7,7 @@ namespace Celeste.Mod.Hateline.Triggers
     public class HatForceTrigger : Trigger
     {
         public string hat;
+        
         public int hatX;
         public int hatY;
 

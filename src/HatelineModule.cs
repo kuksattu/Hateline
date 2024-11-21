@@ -12,25 +12,30 @@ namespace Celeste.Mod.Hateline
     public class HatelineModule : EverestModule
     {
         public static HatelineModule Instance { get; private set; }
-
+        
         public override Type SettingsType => typeof(HatelineModuleSettings);
+        
         public static HatelineModuleSettings Settings => (HatelineModuleSettings)Instance._Settings;
-
+        
         public override Type SessionType => typeof(HatelineModuleSession);
+        
         public static HatelineModuleSession Session => (HatelineModuleSession)Instance._Session;
-
+        
         public bool HasForcedHat => Settings.AllowMapChanges && Session?.MapForcedHat != null;
         public bool ShouldShowHat => HasForcedHat || Settings.Enabled;
+        
         public string? VisibleHat => HasForcedHat ? Session.MapForcedHat : Settings.SelectedHat;
         public string? CurrentHat => ShouldShowHat ? VisibleHat : HAT_NONE;
+        
+        public const string HAT_NONE = "none";
+        
         public int CurrentX => HasForcedHat ? Session.mapsetX : Settings.CrownX;
         public int CurrentY => HasForcedHat ? Session.mapsetY : Settings.CrownY;
-        public const string HAT_NONE = "none";
-
+        
         public static List<string> hats = new List<string>();
-
-
+        
         public Dictionary<string, Dictionary<string, string>> HatAttributes = new();
+        
         // Define custom hat attributes here
         private readonly List<(string, string)> _hatAttributeDefinitions = new()
         { // The name of the attribute and its default value

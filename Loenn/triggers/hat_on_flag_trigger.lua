@@ -9,7 +9,7 @@ hat_on_flag_trigger.placements = {
             inverted = false,
             hat = "flower",
             hatX = 0,
-            hatY = -7,
+            hatY = 0,
         }
     }
 }

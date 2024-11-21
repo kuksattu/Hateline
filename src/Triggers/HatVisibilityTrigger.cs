@@ -16,7 +16,7 @@ namespace Celeste.Mod.Hateline.Triggers
         {
             hat = data.Attr("hat", "flower");
             hatX = data.Int("hatX", 0);
-            hatY = data.Int("hatY", -8);
+            hatY = data.Int("hatY", 0);
         }
         
         public override void OnEnter(Player player)

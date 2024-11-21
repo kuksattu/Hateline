@@ -7,7 +7,7 @@ hat_force_trigger.placements = {
         data = {
             hat = "flower",
             hatX = 0,
-            hatY = -7,
+            hatY = 0,
         }
     }
 }

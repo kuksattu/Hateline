@@ -10,6 +10,7 @@ using On.Celeste.Mod.Core;
 using SDL2;
 
 namespace Celeste.Mod.Hateline;
+
 public static class HatelineSettingsUI
 {
     public static void CreateMenu(TextMenu menu, bool inGame)

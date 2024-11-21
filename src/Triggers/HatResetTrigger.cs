@@ -1,22 +1,21 @@
 ﻿using Celeste.Mod.Entities;
 using Microsoft.Xna.Framework;
 
-namespace Celeste.Mod.Hateline.Triggers
+namespace Celeste.Mod.Hateline.Triggers;
+
+[CustomEntity("Hateline/HatResetTrigger")]
+public class HatResetTrigger : Trigger
 {
-    [CustomEntity("Hateline/HatResetTrigger")]
-    public class HatResetTrigger : Trigger
+    public HatResetTrigger(EntityData data, Vector2 offset)
+        : base(data, offset) { }
+
+    public override void OnEnter(Player player)
     {
-        public HatResetTrigger(EntityData data, Vector2 offset)
-            : base(data, offset) { }
+        base.OnEnter(player);
 
-        public override void OnEnter(Player player)
-        {
-            base.OnEnter(player);
-
-            HatelineModule.Session.MapForcedHat = null;
-            HatelineModule.Session.mapsetX = 0;
-            HatelineModule.Session.mapsetY = 0;
-            HatelineModule.ReloadHat();
-        }
+        HatelineModule.Session.MapForcedHat = null;
+        HatelineModule.Session.mapsetX = 0;
+        HatelineModule.Session.mapsetY = 0;
+        HatelineModule.ReloadHat();
     }
 }

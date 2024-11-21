@@ -14,18 +14,7 @@ public static class HatelineSettingsUI
 {
     public static void CreateMenu(TextMenu menu, bool inGame)
     {
-        List<string> uiHats = new List<string>();
-
-        foreach (string sprite in GFX.SpriteBank.SpriteData.Select(kvp => kvp.Key))
-        {
-            if (!sprite.StartsWith("hateline_"))
-                continue;
-
-            string hatName = sprite.Replace("hateline_", "");
-            if (hatName != HatelineModule.HAT_NONE)
-                uiHats.Add(hatName);
-        }
-        HatelineModule.hats = uiHats.Distinct().ToList();
+        HatelineModule.RegisterHats();
         HatSelector(menu, inGame);
     }
     

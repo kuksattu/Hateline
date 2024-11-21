@@ -32,7 +32,7 @@ namespace Celeste.Mod.Hateline
         public int CurrentX => HasForcedHat ? Session.mapsetX : Settings.CrownX;
         public int CurrentY => HasForcedHat ? Session.mapsetY : Settings.CrownY;
         
-        public static List<string> hats = new List<string>();
+        public static HashSet<string> hats = new();
         
         public Dictionary<string, Dictionary<string, string>> HatAttributes = new();
         
@@ -68,7 +68,7 @@ namespace Celeste.Mod.Hateline
         
         private static void HookLoadLevel(On.Celeste.Level.orig_LoadLevel orig, Level self, Player.IntroTypes playerintro, bool isfromloader)
         {
-            HatelineModule.Instance.HatAttributes = ParseHatXmlAttributes(GFX.SpriteBank.XML);
+            RegisterHats();
             orig(self, playerintro, isfromloader);
         }
         
@@ -103,24 +103,28 @@ namespace Celeste.Mod.Hateline
             
             CelesteNetSupport.CNetComponent?.SendPlayerHat();
         }
-        
-        // Xml parsing for custom hat attributes
-        public static Dictionary<string, Dictionary<string, string>> ParseHatXmlAttributes(XmlDocument xmlDoc)
-        {
-            var result = new Dictionary<string, Dictionary<string, string>>();
-        
-            XmlNodeList nodes = xmlDoc.SelectNodes("//Sprites/*[starts-with(name(), 'hateline_')]");
-            foreach (XmlNode node in nodes)
-            {
-                var attributes = new Dictionary<string, string>();
 
-                foreach ((string name, string defaultValue) in Instance._hatAttributeDefinitions)
-                    attributes[name] = node.Attributes?[name]?.Value ?? defaultValue;
+        public static void RegisterHats()
+        {
+            Instance.HatAttributes.Clear();
+            hats.Clear();
+            foreach (KeyValuePair<string, SpriteData> data in GFX.SpriteBank.SpriteData)
+            {
+                if (!data.Key.StartsWith("hateline_")) continue;
                 
                 // [9..] removes the hateline_ prefix
-                result[node.Name[9..]] = attributes;
+                string hatName = data.Key[9..];
+                XmlNode node = data.Value.Sources[0].XML;
+                Dictionary<string, string> attributesToAdd = new();
+                
+                foreach ((string name, string defaultValue) in Instance._hatAttributeDefinitions)
+                    attributesToAdd[name] = node.Attributes?[name]?.Value ?? defaultValue;
+                
+                Instance.HatAttributes[hatName] = attributesToAdd;
+                
+                if (hatName != HAT_NONE)
+                    hats.Add(hatName);
             }
-            return result;
         }
     }
 }

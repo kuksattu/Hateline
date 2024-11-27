@@ -56,6 +56,7 @@ public class HatelineModule : EverestModule
         // The name of the attribute and its default value
         { "scaling", "true" }, 
         { "flip", "true" },
+        {"tint", "false"}
     };
 
     public override void Load()

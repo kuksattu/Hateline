@@ -44,6 +44,7 @@ public class HatComponent : Sprite
         
         if (GetAttribute("flip") == "false") Scale.X = Math.Abs(Scale.X);
         if (GetAttribute("scaling") == "false" || !HatelineModule.Settings.HatScaling) Scale = Scale.Sign();
+        if (GetAttribute("tint") == "true") Color = playerHair.GetHairColor(0);
         
         base.Render();
     }
@@ -64,6 +65,7 @@ public class HatComponent : Sprite
         if (hatSprite != null && hatSprite == CrownSprite && !forceCreate)
             return;
 
+        Color = Color.White;
         try
         {
             GFX.SpriteBank.CreateOn(this, "hateline_" + hatSprite);

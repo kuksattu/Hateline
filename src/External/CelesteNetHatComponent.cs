@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Linq;
-using System.Reflection;
 using Celeste.Mod.CelesteNet.Client;
 using Celeste.Mod.CelesteNet.Client.Entities;
 using Microsoft.Xna.Framework;
@@ -12,43 +10,28 @@ public class CelesteNetHatComponent : GameComponent
 {
     protected readonly CelesteNetClientModule _clientModule;
     
-    private Delegate _initHook;
-    private Delegate _disposeHook;
-
     public CelesteNetClient Client => _clientModule.Context?.Client;
 
     public CelesteNetHatComponent(Game game) : base(game)
     {
-        _clientModule = (CelesteNetClientModule)Everest.Modules.FirstOrDefault(m => m is CelesteNetClientModule);
-        if (_clientModule == null) throw new Exception("CelesteNet not loaded???");
-        
-        EventInfo startEvent = typeof(CelesteNetClientContext).GetEvent("OnStart");
-        if (startEvent.EventHandlerType.GenericTypeArguments.FirstOrDefault() == typeof(CelesteNetClientContext))
-            startEvent.AddEventHandler(null, _initHook = (Action<CelesteNetClientContext>)(_ => clientStart()));
-        else
-            startEvent.AddEventHandler(null, _initHook = (Action<object>)(_ => clientStart()));
+        if (!Everest.Loader.TryGetDependency(HatelineModule.CelesteNetMetadata, out EverestModule cnet))
+            throw new InvalidOperationException($"Attempted to instantiate {nameof(CelesteNetHatComponent)} while Celeste is not loaded.");
+        _clientModule = (CelesteNetClientModule)cnet;
 
-        EventInfo disposeEvent = typeof(CelesteNetClientContext).GetEvent("OnDispose");
-        if (disposeEvent.EventHandlerType.GenericTypeArguments.FirstOrDefault() == typeof(CelesteNetClientContext))
-            disposeEvent.AddEventHandler(null, _disposeHook = (Action<CelesteNetClientContext>)(_ => clientDisposed()));
-        else
-            disposeEvent.AddEventHandler(null, _disposeHook = (Action<object>)(_ => clientDisposed()));
-    }
-    
-    private void clientDisposed()
-    {
+        CelesteNetClientContext.OnStart += ClientStart;
     }
 
-    private void clientStart()
+    private void ClientStart(CelesteNetClientContext _)
     {
         try
         {
             SendPlayerHat();
             Logger.Log(LogLevel.Verbose, "Hateline", $"clientStart: Called SendPlayerHat at CelesteNetClientContext.OnStart with {Client}");
-        } catch
+        } catch (Exception e)
         {
             // if this threw an exception, CelesteNetClient.Start would actually fail
-            Logger.Log(LogLevel.Warn, "Hateline", $"clientStart: Something went wrong while trying to SendPlayerHat at CelesteNetClientContext.OnStart");
+            Logger.Log(LogLevel.Warn, "Hateline", "Something went wrong while trying to SendPlayerHat at CelesteNetClientContext.OnStart");
+            Logger.Log(LogLevel.Warn, "Hateline", $"{e}");
         }
     }
 
@@ -65,28 +48,26 @@ public class CelesteNetHatComponent : GameComponent
             CelesteNetSupport.CNetComponent?.Client?.Data?.TryGetBoundRef(ghost.PlayerInfo, out hatData);
             if (hatData == null) continue;
             
-            string selHat = hatData?.SelectedHat ?? HatelineModule.HAT_NONE;
+            string selHat = hatData.SelectedHat ?? HatelineModule.HAT_NONE;
             HatComponent hatComp = ghost.Get<HatComponent>();
             
-            switch (hatComp)
-            {
-                case null when hatData.SelectedHat != HatelineModule.HAT_NONE:
-                    ghost.Add(new HatComponent(selHat, hatData?.CrownX, hatData?.CrownY));
-                    continue;
-                case null:
-                    continue;
-            }
-            
-            if (hatData.CrownX != hatComp.CrownX || hatData.CrownY != hatComp.CrownY || hatData.SelectedHat != hatComp.CrownSprite)
-            {
-                hatComp.RemoveSelf();
-                hatComp = new HatComponent(selHat, hatData?.CrownX, hatData?.CrownY);
-                ghost.Add(hatComp);
+            if (hatComp == null)
+            { // Check if ghost has acquired a hat, otherwise continue early.
+                if (selHat != HatelineModule.HAT_NONE)
+                    ghost.Add(new HatComponent(selHat, hatData.CrownX, hatData.CrownY));
+                continue;
             }
             
             if (selHat == HatelineModule.HAT_NONE)
-            {
+            { // Remove ghost's hat if it's none
                 ghost.Remove(hatComp);
+                continue;
+            }
+            
+            if (hatData.CrownX != hatComp.CrownX || hatData.CrownY != hatComp.CrownY || hatData.SelectedHat != hatComp.CrownSprite)
+            { // Update ghost's hat if it changes
+                hatComp.RemoveSelf();
+                ghost.Add(new HatComponent(selHat, hatData.CrownX, hatData.CrownY));
             }
         }
     }

@@ -32,7 +32,7 @@ public class HatelineModule : EverestModule
 #endif
     }
     
-    private static readonly EverestModuleMetadata CelesteNetMetadata = new() { Name = "CelesteNet.Client" };
+    public static readonly EverestModuleMetadata CelesteNetMetadata = new() { Name = "CelesteNet.Client", VersionString = "2.0.0"};
 
     public bool HasForcedHat => Settings.AllowMapChanges && Session?.MapForcedHat != null;
     public bool ShouldShowHat => HasForcedHat || Settings.Enabled;
@@ -58,7 +58,7 @@ public class HatelineModule : EverestModule
         { "flip", "true" },
     };
 
-public override void Load()
+    public override void Load()
     {
         typeof(GravityHelperImports).ModInterop();
         On.Celeste.Player.Added += HookPlayerAdded;

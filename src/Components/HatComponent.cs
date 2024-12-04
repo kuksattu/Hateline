@@ -33,6 +33,7 @@ public class HatComponent : Sprite
         
         Scale = playerHair.PublicGetHairScale(0);
         Scale.Y = Math.Abs(Scale.Y) * gravityFlipMultiplier;
+        // HairFrame 2 (bangs02.png) is used when Madeline's head (and her hair) looks backwards, while Madeline faces forwards. Since the difference is in the texture itself it's hard to detect it directly.
         // There is no guarantee that a skin's bangs02.png is the flipped hair, but it stands true for most skins. 
         FlipX = playerHair.Sprite.HairFrame == 2 && GetAttribute("flip") == "true";
         

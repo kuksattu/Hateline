@@ -28,7 +28,7 @@ public class HatelineModule : EverestModule
         Logger.SetLogLevel(nameof(HatelineModule), LogLevel.Verbose);
 #else
         // release builds use info logging to reduce spam in log files
-        Logger.SetLogLevel(nameof(KelperModule), LogLevel.Info);
+        Logger.SetLogLevel(nameof(HatelineModule), LogLevel.Info);
 #endif
     }
     

@@ -1,5 +1,3 @@
-using Celeste.Mod.Hateline.CelesteNet;
-
 namespace Celeste.Mod.Hateline;
 
 [SettingName("Hateline Settings")]

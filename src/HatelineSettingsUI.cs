@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Xml;
-using Microsoft.Xna.Framework;
-using Monocle;
-using On.Celeste.Mod.Core;
-using SDL2;
+﻿using Monocle;
 
 namespace Celeste.Mod.Hateline;
 

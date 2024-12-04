@@ -1,7 +1,4 @@
 ﻿using System;
-using Celeste.Mod.CelesteNet.Client.Entities;
-using Celeste.Mod.Hateline.CelesteNet;
-using Celeste.Pico8;
 using Microsoft.Xna.Framework;
 using Monocle;
 

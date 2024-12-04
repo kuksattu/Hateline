@@ -20,4 +20,8 @@
     <Justify x=".5" y="1" />
     <Loop id="crown" path="crown" delay="0.12" frames="0-9"/>
   </hateline_boat>
+  <hateline_ribbon path="crown/ribbon/" start="crown">
+    <Justify x=".5" y="1" />
+    <Loop id="crown" path="crown" delay="0"/>
+  </hateline_ribbon>
 </Sprites>

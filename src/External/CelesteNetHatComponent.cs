@@ -76,9 +76,7 @@ public class CelesteNetHatComponent : GameComponent
     {
         if (Client == null) return;
         
-        if(!HatelineModule.Instance.ShouldShowHat && string.IsNullOrEmpty(forceSend)) return;
-
-        string hatToSend = HatelineModule.Instance.VisibleHat;
+        string hatToSend = HatelineModule.Instance.CurrentHat;
         if (!string.IsNullOrEmpty(forceSend))
             hatToSend = forceSend;
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Monocle;
 
@@ -10,6 +11,7 @@ public class HatComponent : Sprite
     public string CrownSprite;
 
     public int CrownX, CrownY;
+    private int _crownOffsetX, _crownOffsetY;
 
     public PlayerHair playerHair => Entity.Get<PlayerHair>();
     
@@ -40,7 +42,7 @@ public class HatComponent : Sprite
         Scale.X *= lookingBackwardsMult;
         
         RenderPosition = playerHair.Nodes[0] + backwardsCompatibilityOffset;
-        RenderPosition += new Vector2(CrownX * Scale.X , CrownY * gravityFlipMult);
+        RenderPosition += new Vector2((CrownX + _crownOffsetX) * Scale.X , (CrownY + _crownOffsetY) * gravityFlipMult);
         
         if (GetAttribute("flip") == "false") Scale.X = Math.Abs(Scale.X);
         if (GetAttribute("scaling") == "false" || !HatelineModule.Settings.HatScaling) Scale = Scale.Sign();
@@ -64,7 +66,7 @@ public class HatComponent : Sprite
     {
         if (hatSprite != null && hatSprite == CrownSprite && !forceCreate)
             return;
-
+        
         Color = Color.White;
         try
         {
@@ -76,6 +78,14 @@ public class HatComponent : Sprite
             GFX.SpriteBank.CreateOn(this, "hateline_" + HatelineModule.HAT_NONE);
             CrownSprite = HatelineModule.HAT_NONE;
         }
+        
+        string hatOffset = GetAttribute("HatOffset");
+        try {
+            int[] crownOffset = hatOffset.Split(',').Select(int.Parse).ToArray();
+            _crownOffsetX = crownOffset[0];
+            _crownOffsetY = crownOffset[1];
+        }
+        catch { throw new ArgumentException($"Invalid HatOffset '{hatOffset}' in hat 'hateline_{CrownSprite}'."); }
     }
 
     public string GetAttribute(string attribute)

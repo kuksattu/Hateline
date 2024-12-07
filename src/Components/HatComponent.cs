@@ -26,19 +26,21 @@ public class HatComponent : Sprite
     {
         if (Entity == null || playerHair == null) return;
         
-        int facing = (int)playerHair.Facing;
-        int gravityFlipMultiplier = (GravityHelperImports.IsActorInverted?.Invoke(Entity as Actor) ?? false) ? -1 : 1;
+        int gravityFlipMult = (GravityHelperImports.IsActorInverted?.Invoke(Entity as Actor) ?? false) ? -1 : 1;
         // The new position system defaults to the hair position instead of the player position which is 7 pixels lower.
-        Vector2 backwardsCompatibilityMovement = new Vector2(0, 7) * gravityFlipMultiplier;
+        Vector2 backwardsCompatibilityOffset = new Vector2(0, 7) * gravityFlipMult;
         
-        Scale = playerHair.PublicGetHairScale(0);
-        Scale.Y = Math.Abs(Scale.Y) * gravityFlipMultiplier;
         // HairFrame 2 (bangs02.png) is used when Madeline's head (and her hair) looks backwards, while Madeline faces forwards. Since the difference is in the texture itself it's hard to detect it directly.
         // There is no guarantee that a skin's bangs02.png is the flipped hair, but it stands true for most skins. 
-        FlipX = playerHair.Sprite.HairFrame == 2 && GetAttribute("flip") == "true";
+        int lookingBackwardsMult = (playerHair.Sprite.HairFrame == 2 && GetAttribute("flip") == "true") ? -1 : 1;
         
-        RenderPosition = playerHair.Nodes[0] + backwardsCompatibilityMovement;
-        RenderPosition += new Vector2(CrownX * facing, CrownY * gravityFlipMultiplier);
+        // PublicGetHairScale gets the scale of the player's hair. It also flips it according to the player's facing.
+        Scale = playerHair.PublicGetHairScale(0);
+        Scale.Y *= gravityFlipMult;
+        Scale.X *= lookingBackwardsMult;
+        
+        RenderPosition = playerHair.Nodes[0] + backwardsCompatibilityOffset;
+        RenderPosition += new Vector2(CrownX * Scale.X , CrownY * gravityFlipMult);
         
         if (GetAttribute("flip") == "false") Scale.X = Math.Abs(Scale.X);
         if (GetAttribute("scaling") == "false" || !HatelineModule.Settings.HatScaling) Scale = Scale.Sign();

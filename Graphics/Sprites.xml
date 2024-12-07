@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Sprites>
-  <hateline_flower path="crown/flower/" start="crown">
+  <hateline_flower path="crown/flower/" start="crown" HatOffset="0,-8">
     <Justify x=".5" y="1" />
     <Loop id="crown" path="crown" delay="0.8"/>
   </hateline_flower>
@@ -8,19 +8,19 @@
     <Justify x=".5" y="1" />
     <Loop id="crown" path="crown" delay="0.8"/>
   </hateline_none>
-  <hateline_cyber path="crown/cybercrown/" start="crown">
+  <hateline_cyber path="crown/cybercrown/" start="crown" HatOffset="0,-8">
     <Justify x=".5" y="1" />
     <Loop id="crown" path="crown" delay="0.8"/>
   </hateline_cyber>
-  <hateline_car path="crown/car/" start="crown">
+  <hateline_car path="crown/car/" start="crown" HatOffset="0,-8">
     <Justify x=".5" y="1" />
     <Loop id="crown" path="crown" delay="0.8"/>
   </hateline_car>
-  <hateline_boat path="crown/boat/" start="crown">
+  <hateline_boat path="crown/boat/" start="crown" HatOffset="0,-8">
     <Justify x=".5" y="1" />
     <Loop id="crown" path="crown" delay="0.12" frames="0-9"/>
   </hateline_boat>
-  <hateline_ribbon path="crown/ribbon/" start="crown">
+  <hateline_ribbon path="crown/ribbon/" start="crown" HatOffset="0,-8">
     <Justify x=".5" y="1" />
     <Loop id="crown" path="crown" delay="0"/>
   </hateline_ribbon>

@@ -60,7 +60,15 @@ public class HatComponent : Sprite
     }
 
     public void SetPosition(int x, int y)
-        => (CrownX, CrownY) = (x, y);
+    {
+        string hatOffset = GetAttribute("HatOffset");
+        try {
+            int[] crownOffset = hatOffset.Split(',').Select(int.Parse).ToArray();
+            CrownX = x + crownOffset[0];
+            CrownY = y + crownOffset[1];
+        }
+        catch { throw new ArgumentException($"Invalid HatOffset '{hatOffset}' in hat 'hateline_{CrownSprite}'."); }
+    }
     
     public void CreateHat(string hatSprite, bool forceCreate = false)
     {

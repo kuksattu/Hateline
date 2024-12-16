@@ -1,8 +1,6 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Monocle;
 
 namespace Celeste.Mod.Hateline;
@@ -24,25 +22,6 @@ public class HatComponent : Sprite
         CreateHat(hatSprite, true);
         if (crownX != null && crownY != null)
             SetPosition(crownX.Value, crownY.Value);
-    }
-
-    public override void Added(Entity entity)
-    {
-        base.Added(entity);
-        if (CrownSprite == "cnet_hat" && entity.GetType() == typeof(Player))
-        {
-            try
-            {
-                Texture2D newTexture = Texture2D.FromStream(Engine.Instance.GraphicsDevice,
-                    new MemoryStream(File.ReadAllBytes(HatelineModule.Settings.CnetHatPath + ".png")));
-                VirtualTexture vtex =
-                    VirtualContent.CreateTexture("randomPath2", newTexture.Width, newTexture.Height, Color.Red);
-                vtex.Texture = newTexture;
-                var mtex = new MTexture(vtex);
-                currentAnimation.Frames = new[] { mtex };
-            }
-            catch { }
-        }
     }
     
     public override void Render()
@@ -111,5 +90,14 @@ public class HatComponent : Sprite
     }
 
     public string GetAttribute(string attribute)
-        => HatelineModule.Instance.HatAttributes[CrownSprite][attribute];
+    { // These are just quick and dirty fixes, ideally we would add the custom hat's attributes to our hats or something
+        try
+        {
+            return HatelineModule.Instance.HatAttributes[CrownSprite][attribute];
+        }
+        catch
+        {
+            return HatelineModule.Instance.HatAttributes["none"][attribute];
+        }
+    }
 }

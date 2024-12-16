@@ -29,6 +29,7 @@ public class CelesteNetHatComponent : GameComponent
         try
         {
             SendPlayerHat();
+            SendCNetHat();
             Logger.Log(LogLevel.Verbose, "Hateline", $"clientStart: Called SendPlayerHat at CelesteNetClientContext.OnStart with {Client}");
         } catch (Exception e)
         {
@@ -48,7 +49,9 @@ public class CelesteNetHatComponent : GameComponent
         foreach (Ghost ghost in Engine.Scene.Tracker.GetEntities<Ghost>())
         {
             DataPlayerHat hatData = null;
+            DataCNetHat cnetHatData = null;
             CelesteNetSupport.CNetComponent?.Client?.Data?.TryGetBoundRef(ghost.PlayerInfo, out hatData);
+            CelesteNetSupport.CNetComponent?.Client?.Data?.TryGetBoundRef(ghost.PlayerInfo, out cnetHatData);
             if (hatData == null) continue;
             
             string selHat = hatData.SelectedHat ?? HatelineModule.HAT_NONE;
@@ -58,10 +61,8 @@ public class CelesteNetHatComponent : GameComponent
             { // Check if ghost has acquired a hat, otherwise continue early.
                 if (selHat != HatelineModule.HAT_NONE)
                 {
-                    ghost.Add(hatComp = new HatComponent(selHat, hatData.CrownX, hatData.CrownY));
-                    HandleCnetHat(hatData, hatComp, ghost.PlayerInfo.ID);
+                    CreateGhostHat(ghost, selHat, hatData, cnetHatData);
                 }
-
                 continue;
             }
             
@@ -74,28 +75,17 @@ public class CelesteNetHatComponent : GameComponent
             if (hatData.CrownX != hatComp.CrownX || hatData.CrownY != hatComp.CrownY || hatData.SelectedHat != hatComp.CrownSprite)
             { // Update ghost's hat if it changes
                 hatComp.RemoveSelf();
-                ghost.Add(hatComp = new HatComponent(selHat, hatData.CrownX, hatData.CrownY));
-                HandleCnetHat(hatData, hatComp, ghost.PlayerInfo.ID);
+                CreateGhostHat(ghost, selHat, hatData, cnetHatData);
             }
         }
     }
 
-    private static void HandleCnetHat(DataPlayerHat hatData, HatComponent hatComp, uint playerID)
+    private void CreateGhostHat(Ghost ghost, string selHat, DataPlayerHat hatData, DataCNetHat cnetHatData)
     {
-        if (hatData.SelectedHat == "cnet_hat"  && hatData.CnetTexture != null)
-        {
-            Texture2D newTexture = Texture2D.FromStream(Engine.Instance.GraphicsDevice, new MemoryStream(hatData.CnetTexture));
-            VirtualTexture vtex = VirtualContent.CreateTexture($"{playerID}/hatelinehat", newTexture.Width, newTexture.Height, Color.Red);
-            vtex.Texture = newTexture;
-            var mtex = new MTexture(vtex);
-            hatComp.animations[$"{playerID}/hatelinehat"] = new Sprite.Animation()
-            {
-                Delay = 0,
-                Frames = new []{mtex},
-                Goto = new Chooser<string>($"{playerID}/hatelinehat", 1f)
-            };
-            hatComp.Play($"{playerID}/hatelinehat");
-        }
+        HatComponent hatComp;
+        ghost.Add(hatComp = new HatComponent(selHat, hatData.CrownX, hatData.CrownY));
+        if(!HatelineModule.hats.Contains(hatData.SelectedHat)) // Only create a cnet hat if said hat doesn't exist already as a loaded hat.
+            cnetHatData?.CreateCnetHat(hatComp, ghost.PlayerInfo.ID, hatData.SelectedHat);
     }
 
     public void SendPlayerHat(string forceSend = null)
@@ -113,5 +103,13 @@ public class CelesteNetHatComponent : GameComponent
             SelectedHat = hatToSend,
             Player = Client.PlayerInfo,
         });
+    }
+
+    public void SendCNetHat()
+    {
+        Sprite hatSprite = GFX.SpriteBank.Create("hateline_" + HatelineModule.Instance.CurrentHat);
+        byte[] hatBytes = hatSprite.currentAnimation.Frames[0].Metadata.Data;
+        if (DataCNetHat.IsInvalidCNetHat(hatBytes)) return;
+        Client.SendAndHandle(new DataCNetHat { CnetHatBytes =  hatBytes});
     }
 }

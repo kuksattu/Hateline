@@ -1,6 +1,8 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Monocle;
 
 namespace Celeste.Mod.Hateline;
@@ -22,6 +24,25 @@ public class HatComponent : Sprite
         CreateHat(hatSprite, true);
         if (crownX != null && crownY != null)
             SetPosition(crownX.Value, crownY.Value);
+    }
+
+    public override void Added(Entity entity)
+    {
+        base.Added(entity);
+        if (CrownSprite == "cnet_hat" && entity.GetType() == typeof(Player))
+        {
+            try
+            {
+                Texture2D newTexture = Texture2D.FromStream(Engine.Instance.GraphicsDevice,
+                    new MemoryStream(File.ReadAllBytes(HatelineModule.Settings.CnetHatPath + ".png")));
+                VirtualTexture vtex =
+                    VirtualContent.CreateTexture("randomPath2", newTexture.Width, newTexture.Height, Color.Red);
+                vtex.Texture = newTexture;
+                var mtex = new MTexture(vtex);
+                currentAnimation.Frames = new[] { mtex };
+            }
+            catch { }
+        }
     }
     
     public override void Render()
@@ -61,7 +82,7 @@ public class HatComponent : Sprite
 
     public void SetPosition(int x, int y)
         => (CrownX, CrownY) = (x, y);
-    
+
     public void CreateHat(string hatSprite, bool forceCreate = false)
     {
         if (hatSprite != null && hatSprite == CrownSprite && !forceCreate)
@@ -78,9 +99,10 @@ public class HatComponent : Sprite
             GFX.SpriteBank.CreateOn(this, "hateline_" + HatelineModule.HAT_NONE);
             CrownSprite = HatelineModule.HAT_NONE;
         }
-        
+
         string hatOffset = GetAttribute("HatOffset");
-        try {
+        try
+        {
             int[] crownOffset = hatOffset.Split(',').Select(int.Parse).ToArray();
             _crownOffsetX = crownOffset[0];
             _crownOffsetY = crownOffset[1];

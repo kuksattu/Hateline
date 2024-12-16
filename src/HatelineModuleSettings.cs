@@ -44,4 +44,6 @@ public class HatelineModuleSettings : EverestModuleSettings
             HatelineModule.ReloadHat();
         }
     }
+    [SettingMaxLength(40)]
+    public string CnetHatPath { get; set; } = "C:/hat/1";
 }

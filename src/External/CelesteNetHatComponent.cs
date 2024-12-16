@@ -1,8 +1,11 @@
 ﻿using System;
+using System.IO;
 using Celeste.Mod.CelesteNet.Client;
 using Celeste.Mod.CelesteNet.Client.Entities;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Monocle;
+using MonoMod.Utils;
 
 namespace Celeste.Mod.Hateline.CelesteNet;
 
@@ -54,7 +57,11 @@ public class CelesteNetHatComponent : GameComponent
             if (hatComp == null)
             { // Check if ghost has acquired a hat, otherwise continue early.
                 if (selHat != HatelineModule.HAT_NONE)
-                    ghost.Add(new HatComponent(selHat, hatData.CrownX, hatData.CrownY));
+                {
+                    ghost.Add(hatComp = new HatComponent(selHat, hatData.CrownX, hatData.CrownY));
+                    HandleCnetHat(hatData, hatComp, ghost.PlayerInfo.ID);
+                }
+
                 continue;
             }
             
@@ -67,8 +74,27 @@ public class CelesteNetHatComponent : GameComponent
             if (hatData.CrownX != hatComp.CrownX || hatData.CrownY != hatComp.CrownY || hatData.SelectedHat != hatComp.CrownSprite)
             { // Update ghost's hat if it changes
                 hatComp.RemoveSelf();
-                ghost.Add(new HatComponent(selHat, hatData.CrownX, hatData.CrownY));
+                ghost.Add(hatComp = new HatComponent(selHat, hatData.CrownX, hatData.CrownY));
+                HandleCnetHat(hatData, hatComp, ghost.PlayerInfo.ID);
             }
+        }
+    }
+
+    private static void HandleCnetHat(DataPlayerHat hatData, HatComponent hatComp, uint playerID)
+    {
+        if (hatData.SelectedHat == "cnet_hat"  && hatData.CnetTexture != null)
+        {
+            Texture2D newTexture = Texture2D.FromStream(Engine.Instance.GraphicsDevice, new MemoryStream(hatData.CnetTexture));
+            VirtualTexture vtex = VirtualContent.CreateTexture($"{playerID}/hatelinehat", newTexture.Width, newTexture.Height, Color.Red);
+            vtex.Texture = newTexture;
+            var mtex = new MTexture(vtex);
+            hatComp.animations[$"{playerID}/hatelinehat"] = new Sprite.Animation()
+            {
+                Delay = 0,
+                Frames = new []{mtex},
+                Goto = new Chooser<string>($"{playerID}/hatelinehat", 1f)
+            };
+            hatComp.Play($"{playerID}/hatelinehat");
         }
     }
 

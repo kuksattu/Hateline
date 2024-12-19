@@ -79,13 +79,13 @@ public class HatComponent : Sprite
             CrownSprite = HatelineModule.HAT_NONE;
         }
         
-        string hatOffset = GetAttribute("HatOffset");
+        string hatOffset = GetAttribute("hatOffset");
         try {
             int[] crownOffset = hatOffset.Split(',').Select(int.Parse).ToArray();
             _crownOffsetX = crownOffset[0];
             _crownOffsetY = crownOffset[1];
         }
-        catch { throw new ArgumentException($"Invalid HatOffset '{hatOffset}' in hat 'hateline_{CrownSprite}'."); }
+        catch { throw new ArgumentException($"Invalid hatOffset '{hatOffset}' in hat 'hateline_{CrownSprite}'."); }
     }
 
     public string GetAttribute(string attribute)

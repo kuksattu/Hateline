@@ -57,7 +57,7 @@ public class HatelineModule : EverestModule
         { "scaling", "true" }, 
         { "flip", "true" },
         {"tint", "false"},
-        {"HatOffset", "0,0"}
+        {"hatOffset", "0,0"}
     };
 
     public override void Load()

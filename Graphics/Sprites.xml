@@ -24,8 +24,39 @@
     <Justify x=".5" y="1" />
     <Loop id="crown" path="crown" delay="0.12" frames="0-9"/>
   </hateline_boat>
-  <hateline_ribbon path="crown/ribbon/" start="crown" HatOffset="0,-8">
-    <Justify x=".5" y="1" />
-    <Loop id="crown" path="crown" delay="0"/>
-  </hateline_ribbon>
+
+  <!-- Hats by kuksa -->
+    <hateline_kuksa_ribbon path="crown/guesthats/kuksa/" start="ribbon" hatOffset="0,-8">
+      <Justify x=".5" y="1" />
+      <Loop id="ribbon" path="ribbon" delay="0"/>
+    </hateline_kuksa_ribbon>
+
+    <hateline_kuksa_collar path="crown/guesthats/kuksa/" start="collar" hatOffset="0,-4">
+      <Justify x=".5" y="1" />
+      <Loop id="collar" path="collar" delay="0"/>
+    </hateline_kuksa_collar>
+
+  <!-- Hats by Zaro -->
+    <hateline_Zaro_niko path="crown/guesthats/Zaro/" start="niko" hatOffset="0,-7">
+      <Justify x=".5" y="1" />
+      <Loop id="niko" path="niko" delay="0"/>
+    </hateline_Zaro_niko>
+
+    <!-- Download the eevee skinmod https://gamebanana.com/mods/446434 -->
+    <hateline_Zaro_eevee path="crown/guesthats/Zaro/eevee/" start="idle" hatOffset="0,-5">
+      <Justify x=".5" y="1" />
+      <Loop id="idle" path="eevee" frames="0*5,1-2,2*4,3,0*5,1-2,2*4,3,0*5,1-2,2*4,3,0*4,4-10,3" delay="0.13"/>
+    </hateline_Zaro_eevee>
+
+  <!-- Hats by Cheepling -->
+    <hateline_Cheepling_hairband path="crown/guesthats/Cheepling/" start="hairband" hatOffset="0,-8">
+      <Justify x=".5" y="1" />
+      <Loop id="hairband" path="hairband" delay="0"/>
+    </hateline_Cheepling_hairband>
+
+    <hateline_Cheepling_bows path="crown/guesthats/Cheepling/" start="bows" hatOffset="0,-8">
+      <Justify x=".5" y="1" />
+      <Loop id="bows" path="bows" delay="0"/>
+    </hateline_Cheepling_bows>
+
 </Sprites>
